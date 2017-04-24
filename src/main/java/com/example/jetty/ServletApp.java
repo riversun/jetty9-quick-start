@@ -27,40 +27,46 @@ public class ServletApp
 {
 	public static void main(String[] args) {
 
+		// ServletContextHandlerはサーブレットをハンドリングする
 		ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
-		// set max size of form contents
+		// フォームのアップロードサイズを指定
 		servletHandler.setMaxFormContentSize(1024 * 1024 * 1024);
 
+		// サーブレットを追加
 		servletHandler.addServlet(new ServletHolder(new ExampleServlet()), "/api");
 
+		// ResourceHandlerは（ざっくりいうと）静的コンテンツをハンドリングする
 		final ResourceHandler resourceHandler = new ResourceHandler();
 
-		// set content dir
+		// 静的コンテンツの置き場所を指定
 		resourceHandler.setResourceBase(System.getProperty("user.dir") + "/htdocs");
 
-		// hide file listings
+		// 静的コンテンツのファイル一覧（リスティング）表示しない
 		resourceHandler.setDirectoriesListed(false);
 
-		// set welcome files
+		// 初期表示するファイルを指定
 		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
 
-		// no cache
+		// キャッシュさせない
 		resourceHandler.setCacheControl("no-store,no-cache,must-revalidate");
 
-		// setup Server and Handler List
 		HandlerList handlerList = new HandlerList();
+
+		// resourceHandlerが先にくるように指定する（逆にすると静的コンテンツは永遠によばれない。。)
 		handlerList.addHandler(resourceHandler);
 		handlerList.addHandler(servletHandler);
 
+		// デフォルトコンストラクタでサーバーを初期化する
 		final Server jettyServer = new Server();
 		jettyServer.setHandler(handlerList);
 
 		final int PORT = 8080;
 
+		// httpの設定クラス
 		final HttpConfiguration httpConfig = new HttpConfiguration();
 
-		// hide server info on header
+		// サーバーのバージョン情報をヘッダにのせない
 		httpConfig.setSendServerVersion(false);
 		final HttpConnectionFactory httpConnFactory = new HttpConnectionFactory(httpConfig);
 		final ServerConnector httpConnector = new ServerConnector(jettyServer, httpConnFactory);
@@ -89,25 +95,27 @@ public class ServletApp
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-			// get qurey parameter
+			// queryパラメータを取得
 			final String paramMessage = req.getParameter("message");
 
-			// create result object
+			// レスポンス格納用POJO(あとでJSONに変換する)
 			final Result result = new Result();
 			result.success = true;
 			result.message = "You say '" + paramMessage + "'";
 
-			// enable CORS
+			// CORS(Cross-Origin Resource Sharing)を有効にする
 			resp.addHeader("Access-Control-Allow-Origin", "*");
 			resp.addHeader("Access-Control-Allow-Headers", "Content-Type");
 
-			// set content type
+			// JSONを返すのContent-TypeをJSONにする
 			final String CONTENT_TYPE = "application/json; charset=UTF-8";
 			resp.setContentType(CONTENT_TYPE);
 
-			// respond as JSON
 			final PrintWriter out = resp.getWriter();
+			// JacksonでPOJOをJSONに変換する
 			final String json = mObjectMapper.writeValueAsString(result);
+
+			// レスポンスを生成
 			out.println(json);
 			out.close();
 
