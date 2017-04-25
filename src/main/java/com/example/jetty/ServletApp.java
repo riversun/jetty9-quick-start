@@ -135,7 +135,8 @@ public class ServletApp
 		protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Sorry, DELETE is not supported");
 		}
-
+		
+		@Override
 		public void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 			// For PreFlight Access
