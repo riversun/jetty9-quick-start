@@ -128,5 +128,15 @@ public class ServletApp
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Sorry, DELETE is not supported");
 		}
 
+		@Override
+		public void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			// For CORS PreFlight Access
+			// Enable CORS
+			resp.addHeader("Access-Control-Allow-Origin", "*");
+			resp.addHeader("Access-Control-Allow-Headers", "Content-Type");
+
+		}
+
 	}
 }
